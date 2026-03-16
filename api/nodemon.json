@@ -1,0 +1,8 @@
+{
+  "watch": [
+    "src",
+    "db",
+    "../../platform-modules"
+  ],
+  "ext": "js,mjs,cjs,json"
+}

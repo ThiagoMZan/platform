@@ -1,0 +1,10 @@
+{
+  "common.save": "Salvar",
+  "common.cancel": "Cancelar",
+  "common.close": "Fechar",
+  "common.edit": "Editar",
+  "common.delete": "Excluir",
+  "auth.invalid_credentials": "Credenciais invalidas",
+  "auth.too_many_login_attempts": "Muitas tentativas de login",
+  "settings.title": "Configuracoes"
+}

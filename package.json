@@ -1,0 +1,11 @@
+{
+  "name": "@saas-platform/platform-core",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Core da plataforma SaaS",
+  "workspaces": [
+    "api",
+    "web"
+  ]
+}

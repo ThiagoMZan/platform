@@ -1,0 +1,10 @@
+{
+  "common.save": "Save",
+  "common.cancel": "Cancel",
+  "common.close": "Close",
+  "common.edit": "Edit",
+  "common.delete": "Delete",
+  "auth.invalid_credentials": "Invalid credentials",
+  "auth.too_many_login_attempts": "Too many login attempts",
+  "settings.title": "Settings"
+}
