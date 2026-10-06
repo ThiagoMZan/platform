@@ -1,3 +1,4 @@
+import { AsyncLocalStorage } from "node:async_hooks";
 import util from "node:util";
 
 let currentHookBus = null;
@@ -10,7 +11,7 @@ let currentFilesService = null;
 let currentJobQueue = null;
 const pendingRegistrations = [];
 const pendingScheduleRegistrations = [];
-const moduleContextStack = [];
+const moduleContextStorage = new AsyncLocalStorage();
 
 function ensureHookBus() {
   if (!currentHookBus) {
@@ -69,7 +70,7 @@ function ensureJobQueue() {
 }
 
 function getCurrentModuleKey() {
-  return moduleContextStack[moduleContextStack.length - 1] || null;
+  return moduleContextStorage.getStore() || null;
 }
 
 function decorateOptions(options = {}) {
@@ -182,12 +183,7 @@ export function attachModuleApi({ hookBus, logger, httpClient, i18nService, dbCl
 }
 
 export async function runWithModuleContext(moduleKey, fn) {
-  moduleContextStack.push(moduleKey);
-  try {
-    return await fn();
-  } finally {
-    moduleContextStack.pop();
-  }
+  return moduleContextStorage.run(moduleKey || null, fn);
 }
 
 export const hooks = {
