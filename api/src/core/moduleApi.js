@@ -7,6 +7,7 @@ let currentI18nService = null;
 let currentDbClient = null;
 let currentScheduleRegistry = null;
 let currentFilesService = null;
+let currentJobQueue = null;
 const pendingRegistrations = [];
 const pendingScheduleRegistrations = [];
 const moduleContextStack = [];
@@ -58,6 +59,13 @@ function ensureFilesService() {
     throw new Error("module_api_not_initialized");
   }
   return currentFilesService;
+}
+
+function ensureJobQueue() {
+  if (!currentJobQueue) {
+    throw new Error("module_api_not_initialized");
+  }
+  return currentJobQueue;
 }
 
 function getCurrentModuleKey() {
@@ -156,7 +164,7 @@ function bindOrQueue(method, args) {
   throw new Error("module_api_not_initialized");
 }
 
-export function attachModuleApi({ hookBus, logger, httpClient, i18nService, dbClient, scheduleRegistry, filesService }) {
+export function attachModuleApi({ hookBus, logger, httpClient, i18nService, dbClient, scheduleRegistry, filesService, jobQueue }) {
   currentHookBus = hookBus;
   currentLogger = logger;
   currentHttpClient = httpClient;
@@ -164,6 +172,7 @@ export function attachModuleApi({ hookBus, logger, httpClient, i18nService, dbCl
   currentDbClient = dbClient;
   currentScheduleRegistry = scheduleRegistry;
   currentFilesService = filesService;
+  currentJobQueue = jobQueue || currentJobQueue;
   for (const registration of pendingRegistrations.splice(0)) {
     currentHookBus[registration.method](...registration.args);
   }
@@ -308,5 +317,22 @@ export const files = {
   },
   download(id, options) {
     return ensureFilesService().download(id, options || {});
+  },
+};
+
+export const jobs = {
+  add(handlerKey, payload = {}, options = {}) {
+    const moduleKey = options.moduleKey || getCurrentModuleKey();
+    return ensureJobQueue().add(handlerKey, payload, {
+      ...options,
+      moduleKey,
+    });
+  },
+  addWithDb(db, handlerKey, payload = {}, options = {}) {
+    const moduleKey = options.moduleKey || getCurrentModuleKey();
+    return ensureJobQueue().addWithDb(db, handlerKey, payload, {
+      ...options,
+      moduleKey,
+    });
   },
 };
