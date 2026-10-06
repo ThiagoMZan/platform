@@ -47,9 +47,10 @@ const schema = z.object({
   RATE_LIMIT_MAX: z.coerce.number().int().positive().default(20),
   RATE_LIMIT_TIME_WINDOW_MS: z.coerce.number().int().positive().default(60000),
 
-  SCHEDULER_ENABLED: envBoolean(false),
-  SCHEDULER_POLL_INTERVAL_MS: z.coerce.number().int().positive().default(5000),
-  SCHEDULER_BATCH_SIZE: z.coerce.number().int().positive().default(5),
+  JOBS_AUTO_MIGRATE: envBoolean(true),
+  JOBS_CONCURRENCY: z.coerce.number().int().positive().default(5),
+  JOBS_POLL_INTERVAL_MS: z.coerce.number().int().positive().default(1000),
+  JOBS_MODULE_REFRESH_MS: z.coerce.number().int().positive().default(30000),
 
   FILES_STORAGE_DRIVER: z.enum(["local", "s3"]).default("local"),
   FILES_LOCAL_DIR: envPath(defaultFilesLocalDir),
