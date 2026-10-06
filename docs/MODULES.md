@@ -149,19 +149,29 @@ Os modulos podem registrar handlers de job em:
 Exemplo:
 
 ```js
-import { schedule } from "#core/moduleApi";
+import { schedule, jobs } from "#core/moduleApi";
 
-schedule.register("people-custom-acme.example-job", async (ctx) => {
-  return { ok: true, ctx };
+schedule.register("people-custom-acme.example-job", async (payload) => {
+  return { ok: true, payload };
+});
+
+await jobs.add("people-custom-acme.example-job", {
+  personId: "..."
 });
 ```
+
+A API apenas enfileira. A execucao ocorre em um processo worker separado usando Graphile Worker e PostgreSQL. Isso permite executar varias instancias de API e worker sem que uma instancia especifica seja dona do job.
+
+Para operacoes em que a gravacao e o job precisam ser atomicos, use `jobs.addWithDb(trx, ...)` dentro da mesma transacao Knex.
+
+Mais detalhes em `api/docs/JOBS.md`.
 
 ## Facade publico do core
 
 Os modulos podem importar do facade publico:
 
 ```js
-import { hooks, http, logging, i18n, db, schedule, files } from "#core/moduleApi";
+import { hooks, http, logging, i18n, db, schedule, jobs, files } from "#core/moduleApi";
 ```
 
 Recursos expostos hoje:
@@ -172,6 +182,7 @@ Recursos expostos hoje:
 - `i18n`
 - `db`
 - `schedule`
+- `jobs`
 - `files`
 
 ## Frontend de modulo

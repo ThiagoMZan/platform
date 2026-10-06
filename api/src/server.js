@@ -28,11 +28,10 @@ import { settingsRoutes } from "./modules/settings/routes.js";
 import { createHookBus } from "./services/hookBus.js";
 import { createModuleHooksService } from "./services/moduleHooksService.js";
 import { createModuleI18nService } from "./services/moduleI18nService.js";
-import { createModuleScheduleService } from "./services/moduleScheduleService.js";
 import { createScheduleRegistry } from "./services/scheduleRegistry.js";
 import { registerCoreHooks } from "./services/hookService.js";
 import { createFilesService } from "./services/filesService.js";
-import { createSchedulerService } from "../../../platform-modules/core-schedule/api/services/schedulerService.js";
+import { createJobQueue } from "./services/jobQueue.js";
 import { filesRoutes } from "./modules/files/routes.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -58,15 +57,11 @@ export async function buildApp() {
   });
   const moduleHooks = createModuleHooksService({ hookBus, logger: app.log });
   const moduleI18n = createModuleI18nService({ i18nService });
-  const moduleSchedule = createModuleScheduleService({ scheduleRegistry, getDb: () => app.db, logger: app.log });
   const filesService = createFilesService({ db: dbClient, config, logger: app.log });
-  const schedulerService = createSchedulerService({
-    db: dbClient,
-    scheduleRegistry,
+  const jobs = createJobQueue({
+    connectionString: config.DATABASE_URL,
     logger: app.log,
-    enabled: config.SCHEDULER_ENABLED,
-    pollIntervalMs: config.SCHEDULER_POLL_INTERVAL_MS,
-    batchSize: config.SCHEDULER_BATCH_SIZE,
+    autoMigrate: config.JOBS_AUTO_MIGRATE,
   });
   app.decorate("hookBus", hookBus);
   app.decorate("scheduleRegistry", scheduleRegistry);
@@ -74,11 +69,10 @@ export async function buildApp() {
   app.decorate("moduleHooks", moduleHooks);
   app.decorate("i18nService", i18nService);
   app.decorate("moduleI18n", moduleI18n);
-  app.decorate("moduleSchedule", moduleSchedule);
   app.decorate("filesService", filesService);
-  app.decorate("schedulerService", schedulerService);
+  app.decorate("jobs", jobs);
   app.decorate("currentLocale", "pt-BR");
-  attachModuleApi({ hookBus, logger: app.log, httpClient, i18nService, dbClient, scheduleRegistry, filesService });
+  attachModuleApi({ hookBus, logger: app.log, httpClient, i18nService, dbClient, scheduleRegistry, filesService, jobQueue: jobs });
   registerCoreHooks(hookBus);
 
   app.register(cookie);
@@ -118,12 +112,11 @@ export async function buildApp() {
     const activeModules = await repoModules.listActiveInstalledModules();
     await moduleHooks.syncActiveModules(activeModules);
     await moduleI18n.syncActiveModules(activeModules);
-    await moduleSchedule.syncActiveModules(activeModules);
-    schedulerService.start();
+    await jobs.start();
   });
 
   app.addHook("onClose", async () => {
-    await schedulerService.stop();
+    await jobs.close();
   });
 
   app.get("/health", async () => ({ ok: true }));
