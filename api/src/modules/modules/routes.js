@@ -110,7 +110,6 @@ export async function modulesRoutes(fastify) {
     const activeModules = await repoModules.listActiveInstalledModules();
     await fastify.moduleHooks.syncActiveModules(activeModules);
     await fastify.moduleI18n.syncActiveModules(activeModules);
-    await fastify.moduleSchedule.syncActiveModules(activeModules);
 
     return reply.send({ synced: items.length, items });
   });
@@ -158,7 +157,6 @@ export async function modulesRoutes(fastify) {
     const activeModules = await repoModules.listActiveInstalledModules();
     await fastify.moduleHooks.syncActiveModules(activeModules);
     await fastify.moduleI18n.syncActiveModules(activeModules);
-    await fastify.moduleSchedule.syncActiveModules(activeModules);
 
     return reply.send({ installed_module: installed });
   });
@@ -181,7 +179,6 @@ export async function modulesRoutes(fastify) {
     const activeModules = await repoModules.listActiveInstalledModules();
     await fastify.moduleHooks.syncActiveModules(activeModules);
     await fastify.moduleI18n.syncActiveModules(activeModules);
-    await fastify.moduleSchedule.syncActiveModules(activeModules);
 
     return reply.send({ installed_module: installed });
   });
@@ -208,7 +205,6 @@ export async function modulesRoutes(fastify) {
     const activeModules = await repoModules.listActiveInstalledModules();
     await fastify.moduleHooks.syncActiveModules(activeModules);
     await fastify.moduleI18n.syncActiveModules(activeModules);
-    await fastify.moduleSchedule.syncActiveModules(activeModules);
 
     return reply.send({ ok: true });
   });
